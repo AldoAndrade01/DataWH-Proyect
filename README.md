@@ -1,10 +1,13 @@
 # 🎵 Data Warehouse de Música  
 **Proyecto de la materia: Almacenes de Datos – 7mo semestre**
-**Equipo**
+
+**Equipo:**
 
 **Andrade Ramos Aldo Alberto - 217431633**
-**Cano Lopez Brayan Oswaldo - 219423212 **
-**Sekaran Rojo Mahatma - 218869276 **
+
+**Cano Lopez Brayan Oswaldo - 219423212**
+
+**Sekaran Rojo Mahatma - 218869276**
 
 ---
 
