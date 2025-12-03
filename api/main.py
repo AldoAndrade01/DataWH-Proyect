@@ -1,17 +1,12 @@
-from fastapi import FastAPI, UploadFile, File, Form, BackgroundTasks, HTTPException, Request
-from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
+from fastapi import FastAPI, UploadFile, File, Form, BackgroundTasks, HTTPException
 from uuid import uuid4
 from pathlib import Path
 import json
 from typing import Dict, Any, Optional
 
 from etl.pipeline import run_pipeline_single, run_pipeline_merge
-from ml.training import run_training_and_plots
 
 app = FastAPI(title="DW Música - ETL API")
-app.mount("/static", StaticFiles(directory="api/static"), name="static")
-templates = Jinja2Templates(directory="api/templates")
 
 STATE_PATH = Path("api/state.json")
 STATE_PATH.parent.mkdir(parents=True, exist_ok=True)
@@ -37,8 +32,8 @@ def get_state(pid: str) -> Optional[Dict[str, Any]]:
 
 # ---------- endpoints ----------
 @app.get("/")
-def root(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+def root():
+    return {"message": "API del Data Warehouse de Música lista"}
 
 
 @app.post("/ingest")
@@ -115,38 +110,3 @@ def merge_final():
 
     stats = run_pipeline_merge(str(d1), str(d2), str(d3), str(out))
     return {"status": "ok", "stats": stats, "output": str(out)}
-
-
-@app.post("/train-models")
-def train_models(request: Request):
-    """
-    Verifica que exista el dataset final y ejecuta entrenamiento + generación de gráficas.
-    Renderiza api/templates/results.html con métricas, modelo ganador y rutas de PNG.
-    """
-    tracks = Path("data/processed/tracks_clean.csv")
-    if not tracks.exists():
-        raise HTTPException(400, detail="No existe data/processed/tracks_clean.csv. Ejecuta /merge primero.")
-
-    try:
-        result = run_training_and_plots(str(tracks))
-    except Exception as e:
-        raise HTTPException(500, detail=f"Error al entrenar modelos: {e}")
-
-    metrics = result.get("metrics") or {}
-    winner = result.get("winner") or result.get("best_model")
-    plots = result.get("plots") or result.get("plot_paths") or []
-
-    if isinstance(plots, dict):
-        plots = list(plots.values())
-    elif isinstance(plots, str):
-        plots = [plots]
-
-    return templates.TemplateResponse(
-        "results.html",
-        {
-            "request": request,
-            "metrics": metrics,
-            "winner": winner,
-            "plots": plots,
-        },
-    )
