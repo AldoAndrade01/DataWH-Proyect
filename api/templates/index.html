@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DW Música — ETL y ML</title>
+  <style>
+    body { font-family: system-ui, Arial, sans-serif; margin: 2rem; }
+    header { margin-bottom: 1.5rem; }
+    section { margin-bottom: 2rem; padding: 1rem; border: 1px solid #ddd; border-radius: 8px; }
+    h2 { margin-top: 0; }
+    form { display: grid; gap: 0.75rem; }
+    label { font-weight: 600; }
+    .row { display: flex; gap: 1rem; align-items: center; }
+    button { padding: 0.5rem 1rem; cursor: pointer; }
+  </style>
+  <script>
+    // Evita doble envío
+    function disableOnSubmit(btn) {
+      btn.disabled = true;
+      btn.innerText = 'Procesando...';
+    }
+  </script>
+</head>
+<body>
+  <header>
+    <h1>Data Warehouse de Música — Panel ETL y Modelado</h1>
+    <p>Usa este panel para ingerir archivos, unificar datos y entrenar modelos.</p>
+  </header>
+
+  <section>
+    <h2>1) Ingesta de datos</h2>
+    <form action="/ingest" method="post" enctype="multipart/form-data">
+      <div class="row">
+        <label for="file">Archivo a subir:</label>
+        <input type="file" id="file" name="file" required />
+      </div>
+      <div class="row">
+        <label for="source_name">Fuente:</label>
+        <select id="source_name" name="source_name" required>
+          <option value="D1">D1</option>
+          <option value="D2">D2</option>
+          <option value="D3">D3</option>
+        </select>
+      </div>
+      <div>
+        <button type="submit" onclick="disableOnSubmit(this)">Subir y limpiar</button>
+      </div>
+    </form>
+    <p>El proceso se ejecuta en segundo plano. Usa <code>/process/{pid}</code> para consultar el estado.</p>
+  </section>
+
+  <section>
+    <h2>2) Unificar datos limpios</h2>
+    <form action="/merge" method="post">
+      <button type="submit" onclick="disableOnSubmit(this)">Generar <code>data/processed/tracks_clean.csv</code></button>
+    </form>
+    <p>Requiere: <code>data/interim/d1_clean.csv</code>, <code>d2_clean.csv</code> y <code>d3_artists_clean.csv</code>.</p>
+  </section>
+
+  <section>
+    <h2>3) Entrenar modelos y mostrar gráficas</h2>
+    <form action="/train-models" method="post">
+      <button type="submit" onclick="disableOnSubmit(this)">Entrenar modelos y ver resultados</button>
+    </form>
+    <p>Usa el dataset consolidado: <code>data/processed/tracks_clean.csv</code>.</p>
+  </section>
+
+</body>
+</html>
+
